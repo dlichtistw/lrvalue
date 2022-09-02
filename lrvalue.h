@@ -1,3 +1,5 @@
+#pragma once
+
 #include <variant>
 
 namespace lrvalue
@@ -19,7 +21,7 @@ namespace lrvalue
       Reference( T &value ) : _value( value ) {}
       operator const T &() const { return _value; }
       operator T &(){ return _value; }
-      T &get(){ return *this; }
+      // T &get(){ return *this; }
     };
 
     template< typename T >
@@ -29,7 +31,7 @@ namespace lrvalue
     public:
       Reference( const T &value ) : _value( value ) {}
       operator const T &() const { return _value; }
-      const T &get() const { return *this; }
+      // const T &get() const { return *this; }
     };
 
     template< typename T >
@@ -40,7 +42,7 @@ namespace lrvalue
       Value( T &&value ) : _value( std::move( value ) ) {}
       operator const T &() const { return _value; }
       operator T &(){ return _value; }
-      T &get(){ return *this; }
+      // T &get(){ return *this; }
     };
   }
 
@@ -92,4 +94,15 @@ namespace lrvalue
 
   template< typename T >
   LRValue( T && ) -> LRValue< T >;
+
+  template< typename T >
+  using Storage = std::variant< detail::Reference< T >, detail::Value< T > >;
+
+  template< typename T >
+  T &get( Storage< T > &storage )
+  { return std::visit( []( auto &d ) -> T & { return d; }, storage ); }
+
+  template< typename T >
+  const T &get( const Storage< T > &storage )
+  { return std::visit( []( const auto &d ) -> const T & { return d; }, storage ); }
 }

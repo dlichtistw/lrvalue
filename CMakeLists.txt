@@ -10,6 +10,10 @@ add_executable(construction_test construction_test.cpp)
 target_link_libraries(construction_test test_util)
 add_test(NAME construction_test COMMAND construction_test)
 
+add_executable(conversion_test conversion_test.cpp)
+target_link_libraries(conversion_test test_util)
+add_test(NAME conversion_test COMMAND conversion_test)
+
 add_executable(boccara_test boccara_test.cpp)
 add_test(NAME boccara_test COMMAND boccara_test)
 

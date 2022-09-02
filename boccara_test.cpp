@@ -14,11 +14,11 @@ namespace
     using value_type = detail::Value< type >;
 
   public:
-    explicit MyClass( std::string &value) : _storage( reference_type( value ) ) {}
-    explicit MyClass( std::string const &value) : _storage( reference_type( value ) ) {}
-    explicit MyClass( std::string &&value) : _storage( value_type( std::move( value ) ) ) {}
+    explicit MyClass( std::string &value ) : _storage( reference_type( value ) ) {}
+    explicit MyClass( const std::string &value ) : _storage( reference_type( value ) ) {}
+    explicit MyClass( std::string &&value ) : _storage( value_type( std::move( value ) ) ) {}
 
-    void print()
+    void print() const
     {
         std::cout << get( _storage ) << std::endl;
     }
@@ -32,6 +32,12 @@ int main()
 {
   {
     std::string s{ "hello" };
+    MyClass myObject{ s };
+    myObject.print();
+  }
+
+  {
+    const std::string s{ "hello" };
     MyClass myObject{ s };
     myObject.print();
   }

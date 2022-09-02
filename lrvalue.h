@@ -20,8 +20,7 @@ namespace lrvalue
     public:
       Reference( T &value ) : _value( value ) {}
       operator const T &() const { return _value; }
-      operator T &(){ return _value; }
-      // T &get(){ return *this; }
+      operator T &() { return _value; }
     };
 
     template< typename T >
@@ -31,7 +30,6 @@ namespace lrvalue
     public:
       Reference( const T &value ) : _value( value ) {}
       operator const T &() const { return _value; }
-      // const T &get() const { return *this; }
     };
 
     template< typename T >
@@ -41,8 +39,7 @@ namespace lrvalue
     public:
       Value( T &&value ) : _value( std::move( value ) ) {}
       operator const T &() const { return _value; }
-      operator T &(){ return _value; }
-      // T &get(){ return *this; }
+      operator T &() { return _value; }
     };
   }
 
@@ -59,19 +56,10 @@ namespace lrvalue
     LRValue( type &&value ) : _value( value_type( std::move( value ) ) ) {}
 
     operator const type &() const { return std::visit( []( const auto &v ) -> const type & { return v; }, _value ); }
-    operator type &(){ return std::visit( []( auto &v ) -> type & { return v; }, _value ); }
+    operator type &() { return std::visit( []( auto &v ) -> type & { return v; }, _value ); }
 
     operator LRValue< const type > ()
-    {
-      using result_type = LRValue< const type >;
-      return std::visit( Overload(
-        []( reference_type &mut ) -> result_type { return mut.get(); },
-        []( value_type &val ) -> result_type { return std::move( val.get() ); }
-      ), _value );
-    }
-
-    const type &get() const { return *this; }
-    type & get(){ return *this; }
+    { return std::visit( []( auto &v ) -> LRValue< const type >{ return { v }; }, _value ); }
   };
 
   template< typename T >
@@ -87,13 +75,15 @@ namespace lrvalue
     LRValue( const type &value ) : _value( reference_type( value ) ) {}
     LRValue( type &&value ) : _value( value_type( std::move( value ) ) ) {}
 
-    operator const type &() const { return std::visit( []( const auto &v ) -> const type & { return v; }, _value ); }
-
-    const type &get() const { return *this; }
+    operator const type &() const
+    { return std::visit( []( const auto &v ) -> const type & { return v; }, _value ); }
   };
 
   template< typename T >
   LRValue( T && ) -> LRValue< T >;
+
+  template< typename T >
+  LRValue( const T & ) -> LRValue< const T >;
 
   template< typename T >
   using Storage = std::variant< detail::Reference< T >, detail::Value< T > >;

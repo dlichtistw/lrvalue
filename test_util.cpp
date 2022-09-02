@@ -26,22 +26,27 @@ void Sentinel::count( const Call call )
   std::cout << "Call " << c << " to " << call << std::endl;
 }
 
-Sentinel::Sentinel(){ count( Call::DefaultConstructor ); }
-Sentinel::Sentinel( const Sentinel & ){ count( Call::CopyConstructor ); }
-Sentinel::Sentinel( Sentinel && ){ count( Call::MoveConstructor ); }
+Sentinel::Sentinel() { count( Call::DefaultConstructor ); }
+Sentinel::Sentinel( const Sentinel & ) { count( Call::CopyConstructor ); }
+Sentinel::Sentinel( Sentinel && ) { count( Call::MoveConstructor ); }
 
-Sentinel &Sentinel::operator=( const Sentinel & ){ count( Call::CopyAssignment ); return *this; }
-Sentinel &Sentinel::operator=( Sentinel && ){ count( Call::MoveAssignment ); return *this; }
+Sentinel &Sentinel::operator=( const Sentinel & ) { count( Call::CopyAssignment ); return *this; }
+Sentinel &Sentinel::operator=( Sentinel && ) { count( Call::MoveAssignment ); return *this; }
 
-Sentinel::~Sentinel(){ count( Call::Destructor ); }
+Sentinel::~Sentinel() { count( Call::Destructor ); }
 
 int Sentinel::calls()
 {
   return std::accumulate( _counter.begin(), _counter.end(), 0,
                           []( int sum, const Counter::value_type &entry ){ return sum + entry.second; } );
 }
-int Sentinel::calls( const Call call ){ return _counter[ call ]; }
-void Sentinel::clear(){ _counter.clear(); }
+int Sentinel::calls( const Call call ) { return _counter[ call ]; }
 
-Sentinel::Counter Sentinel::_counter{};
+void Sentinel::clear()
+{
+  _counter.clear();
+  std::cout << "Call counter cleared." << std::endl;
+}
+
+Sentinel::Counter Sentinel::_counter;
 

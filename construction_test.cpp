@@ -8,25 +8,23 @@ using namespace lrvalue::test;
 
 namespace
 {
-  void constructionByMutableReference()
+  void ConstructionByMutableReference()
   {
     Sentinel sentinel;
-
     Sentinel::clear();
 
-    LRValue< Sentinel > mut{ sentinel };
-    LRValue< const Sentinel > con{ sentinel };
+    LRValue< Sentinel >{ sentinel };
+    LRValue< const Sentinel >{ sentinel };
 
     assert( Sentinel::calls() == 0 );
   }
 
   void ConstructionByConstantReference()
   {
-    Sentinel sentinel;
-
+    const Sentinel sentinel;
     Sentinel::clear();
 
-    LRValue con{ sentinel };
+    LRValue< const Sentinel >{ sentinel };
 
     assert( Sentinel::calls() == 0 );
   }
@@ -34,26 +32,44 @@ namespace
   void ConstructionByTemporary()
   {
     Sentinel::clear();
+    LRValue mut{ Sentinel{} };
 
-    LRValue mut{ Sentinel() };
+    assert( Sentinel::calls( Call::DefaultConstructor ) == 1 );
+    assert( Sentinel::calls( Call::MoveConstructor ) == 2 );
+    assert( Sentinel::calls( Call::Destructor ) == 2 );
+    assert( Sentinel::calls() == 5 );
+
+    Sentinel::clear();
+
+    LRValue< const Sentinel > con{ Sentinel{} };
 
     assert( Sentinel::calls( Call::DefaultConstructor ) == 1 );
     assert( Sentinel::calls( Call::MoveConstructor ) == 2 );
     assert( Sentinel::calls( Call::Destructor ) == 2 );
 
-    LRValue< const Sentinel > con{ Sentinel() };
+    assert( Sentinel::calls() == 5 );
+  }
 
-    assert( Sentinel::calls( Call::DefaultConstructor ) == 2 );
-    assert( Sentinel::calls( Call::MoveConstructor ) == 4 );
-    assert( Sentinel::calls( Call::Destructor ) == 4 );
+  void ConstructionByDeduction()
+  {
+    Sentinel sentinel;
+    Sentinel::clear();
 
-    assert( Sentinel::calls() == 10 );
+    LRValue fromMutable{ sentinel };
+    LRValue fromConstant{ std::as_const( sentinel ) };
+    LRValue fromTemporary{ Sentinel{} };
+
+    assert( Sentinel::calls( Call::DefaultConstructor ) == 1 );
+    assert( Sentinel::calls( Call::MoveConstructor ) == 2 );
+    assert( Sentinel::calls( Call::Destructor ) == 2 );
+    assert( Sentinel::calls() == 5 );
   }
 }
 
 int main()
 {
-  constructionByMutableReference();
+  ConstructionByMutableReference();
   ConstructionByConstantReference();
   ConstructionByTemporary();
+  ConstructionByDeduction();
 }

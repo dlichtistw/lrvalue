@@ -5,6 +5,15 @@
 
 using namespace lrvalue::test;
 
+namespace
+{
+  int sum( const std::map< Call, int > &counter )
+  {
+    return std::accumulate( counter.begin(), counter.end(), 0,
+                            []( int sum, const auto &entry ){ return sum + entry.second; } );
+  }
+}
+
 std::ostream &lrvalue::test::operator<<( std::ostream &stream, const Call call )
 {
   switch ( call )
@@ -22,31 +31,47 @@ std::ostream &lrvalue::test::operator<<( std::ostream &stream, const Call call )
 
 void Sentinel::count( const Call call )
 {
-  const int c = ++_counter[ call ];
+  ++_globalCounter[ call ];
+  const int c = ++_instanceCounter[ call ];
   std::cout << "Call " << c << " to " << call << std::endl;
 }
 
 Sentinel::Sentinel() { count( Call::DefaultConstructor ); }
-Sentinel::Sentinel( const Sentinel & ) { count( Call::CopyConstructor ); }
-Sentinel::Sentinel( Sentinel && ) { count( Call::MoveConstructor ); }
+Sentinel::Sentinel( const Sentinel &sentinel ) : _instanceCounter( sentinel._instanceCounter ) { count( Call::CopyConstructor ); }
+Sentinel::Sentinel( Sentinel &&sentinel ) : _instanceCounter( std::move( sentinel._instanceCounter ) ) { count( Call::MoveConstructor ); }
 
-Sentinel &Sentinel::operator=( const Sentinel & ) { count( Call::CopyAssignment ); return *this; }
-Sentinel &Sentinel::operator=( Sentinel && ) { count( Call::MoveAssignment ); return *this; }
+Sentinel &Sentinel::operator=( const Sentinel &sentinel )
+{
+  _instanceCounter = sentinel._instanceCounter;
+  count( Call::CopyAssignment );
+  return *this;
+}
+Sentinel &Sentinel::operator=( Sentinel &&sentinel )
+{
+  _instanceCounter = std::move( sentinel._instanceCounter );
+  count( Call::MoveAssignment );
+  return *this;
+}
 
 Sentinel::~Sentinel() { count( Call::Destructor ); }
 
-int Sentinel::calls()
-{
-  return std::accumulate( _counter.begin(), _counter.end(), 0,
-                          []( int sum, const Counter::value_type &entry ){ return sum + entry.second; } );
-}
-int Sentinel::calls( const Call call ) { return _counter[ call ]; }
+int Sentinel::calls() { return sum( _globalCounter ); }
+int Sentinel::calls( const Call call ) { return _globalCounter[ call ]; }
 
-void Sentinel::clear()
+int Sentinel::operator()() const { return sum( _instanceCounter ); }
+int Sentinel::operator()( const Call call ) const { return _instanceCounter[ call ]; }
+
+void Sentinel::clearGlobal()
 {
-  _counter.clear();
-  std::cout << "Call counter cleared." << std::endl;
+  _globalCounter.clear();
+  std::cout << "Global call counter cleared." << std::endl;
 }
 
-Sentinel::Counter Sentinel::_counter;
+void Sentinel::clearThis()
+{
+  _instanceCounter.clear();
+  std::cout << "Instance call counter cleared." << std::endl;
+}
+
+Sentinel::Counter Sentinel::_globalCounter;
 

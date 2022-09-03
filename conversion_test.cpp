@@ -12,7 +12,7 @@ namespace
   {
     Sentinel sentinel;
     LRValue fromMutable{ sentinel };
-    Sentinel::clear();
+    Sentinel::clearGlobal();
 
     static_cast< Sentinel & >( fromMutable );
     static_cast< const Sentinel & >( fromMutable );
@@ -20,14 +20,14 @@ namespace
     assert( Sentinel::calls() == 0 );
 
     LRValue fromConstant{ std::as_const( sentinel ) };
-    Sentinel::clear();
+    Sentinel::clearGlobal();
 
     static_cast< const Sentinel & >( fromConstant );
 
     assert( Sentinel::calls() == 0 );
 
     LRValue fromTemporary{ Sentinel() };
-    Sentinel::clear();
+    Sentinel::clearGlobal();
 
     static_cast< Sentinel & >( fromTemporary );
     static_cast< const Sentinel & >( fromTemporary );
@@ -39,21 +39,21 @@ namespace
   {
     Sentinel sentinel;
     LRValue fromMutable{ sentinel };
-    Sentinel::clear();
+    Sentinel::clearGlobal();
 
     static_cast< LRValue< const Sentinel > >( fromMutable );
 
     assert( Sentinel::calls() == 0 );
 
     LRValue fromConstant{ std::as_const( sentinel ) };
-    Sentinel::clear();
+    Sentinel::clearGlobal();
 
     static_cast< LRValue< const Sentinel > >( fromConstant );
 
     assert( Sentinel::calls() == 0 );
 
     LRValue< Sentinel > fromTemporary{ Sentinel{} };
-    Sentinel::clear();
+    Sentinel::clearGlobal();
 
     static_cast< LRValue< const Sentinel > >( fromTemporary );
 

@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.0.0)
 project(lrvalue VERSION 0.1.0)
 
+set(CMAKE_CXX_STANDARD 20)
+
 include(CTest)
 enable_testing()
 
@@ -13,6 +15,10 @@ add_test(NAME construction_test COMMAND construction_test)
 add_executable(conversion_test conversion_test.cpp)
 target_link_libraries(conversion_test test_util)
 add_test(NAME conversion_test COMMAND conversion_test)
+
+add_executable(interface_test interface_test.cpp)
+target_link_libraries(interface_test test_util)
+add_test(NAME interface_test COMMAND function_call_test)
 
 add_executable(boccara_test boccara_test.cpp)
 add_test(NAME boccara_test COMMAND boccara_test)

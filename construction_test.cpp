@@ -11,7 +11,7 @@ namespace
   void ConstructionByMutableReference()
   {
     Sentinel sentinel;
-    Sentinel::clear();
+    Sentinel::clearGlobal();
 
     LRValue< Sentinel >{ sentinel };
     LRValue< const Sentinel >{ sentinel };
@@ -22,7 +22,7 @@ namespace
   void ConstructionByConstantReference()
   {
     const Sentinel sentinel;
-    Sentinel::clear();
+    Sentinel::clearGlobal();
 
     LRValue< const Sentinel >{ sentinel };
 
@@ -31,7 +31,7 @@ namespace
 
   void ConstructionByTemporary()
   {
-    Sentinel::clear();
+    Sentinel::clearGlobal();
     LRValue mut{ Sentinel{} };
 
     assert( Sentinel::calls( Call::DefaultConstructor ) == 1 );
@@ -39,7 +39,7 @@ namespace
     assert( Sentinel::calls( Call::Destructor ) == 2 );
     assert( Sentinel::calls() == 5 );
 
-    Sentinel::clear();
+    Sentinel::clearGlobal();
 
     LRValue< const Sentinel > con{ Sentinel{} };
 
@@ -53,7 +53,7 @@ namespace
   void ConstructionByDeduction()
   {
     Sentinel sentinel;
-    Sentinel::clear();
+    Sentinel::clearGlobal();
 
     LRValue fromMutable{ sentinel };
     LRValue fromConstant{ std::as_const( sentinel ) };

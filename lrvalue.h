@@ -1,6 +1,7 @@
 #pragma once
 
 #include <variant>
+#include <functional>
 
 namespace lrvalue
 {
@@ -30,6 +31,7 @@ namespace lrvalue
     public:
       Reference( const T &value ) : _value( value ) {}
       operator const T &() const { return _value; }
+      // operator T() const { return _value; }
     };
 
     template< typename T >
@@ -53,6 +55,7 @@ namespace lrvalue
 
   public:
     LRValue( type &value ) : _value( reference_type( value ) ) {}
+    // LRValue( const type &value ) : _value( value_type( value ) ) {}
     LRValue( type &&value ) : _value( value_type( std::move( value ) ) ) {}
 
     operator const type &() const { return std::visit( []( const auto &v ) -> const type & { return v; }, _value ); }
@@ -75,8 +78,8 @@ namespace lrvalue
     LRValue( const type &value ) : _value( reference_type( value ) ) {}
     LRValue( type &&value ) : _value( value_type( std::move( value ) ) ) {}
 
-    operator const type &() const
-    { return std::visit( []( const auto &v ) -> const type & { return v; }, _value ); }
+    operator const type &() const { return std::visit( []( const auto &v ) -> const type & { return v; }, _value ); }
+    // operator type() const { return std::visit( []( const auto &v ) -> type { return v; }, _value ); }
   };
 
   template< typename T >

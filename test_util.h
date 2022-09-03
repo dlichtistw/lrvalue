@@ -20,9 +20,10 @@ namespace lrvalue::test
   class Sentinel
   {
     using Counter = std::map< Call, int >;
-    static Counter _counter;
+    static Counter _globalCounter;
+    mutable Counter _instanceCounter;
 
-    static void count( const Call call );
+    void count( const Call call );
 
   public:
     Sentinel();
@@ -36,6 +37,11 @@ namespace lrvalue::test
 
     static int calls();
     static int calls( const Call call );
-    static void clear();
+
+    int operator()() const;
+    int operator()( const Call call ) const;
+
+    static void clearGlobal();
+    void clearThis();
   };
 }

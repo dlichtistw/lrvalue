@@ -5,52 +5,12 @@
 
 namespace lrvalue
 {
-  namespace detail
-  {
-    template< typename... Functions >
-    struct Overload : Functions...
-    {
-        using Functions::operator()...;
-        Overload( Functions &&... functions ) : Functions( std::forward< Functions >( functions ) )... {}
-    };
-
-    template< typename T >
-    class Reference
-    {
-      T &_value;
-    public:
-      Reference( T &value ) : _value( value ) {}
-      operator const T &() const { return _value; }
-      operator T &() { return _value; }
-    };
-
-    template< typename T >
-    class Reference< const T >
-    {
-      const T &_value;
-    public:
-      Reference( const T &value ) : _value( value ) {}
-      operator const T &() const { return _value; }
-      // operator T() const { return _value; }
-    };
-
-    template< typename T >
-    class Value
-    {
-      T _value;
-    public:
-      Value( T &&value ) : _value( std::move( value ) ) {}
-      operator const T &() const { return _value; }
-      operator T &() { return _value; }
-    };
-  }
-
   template< typename T >
   class LRValue
   {
     using type = std::decay_t< T >;
-    using reference_type = detail::Reference< type >;
-    using value_type = detail::Value< type >;
+    using reference_type = std::reference_wrapper< type >;
+    using value_type = type;
     std::variant< reference_type, value_type > _value;
 
   public:
@@ -69,8 +29,8 @@ namespace lrvalue
   class LRValue< const T >
   {
     using type = std::decay_t< T >;
-    using reference_type = detail::Reference< const type >;
-    using value_type = detail::Value< type >;
+    using reference_type = std::reference_wrapper< const type >;
+    using value_type = type;
     std::variant< reference_type, value_type > _value;
 
   public:
@@ -89,7 +49,7 @@ namespace lrvalue
   LRValue( const T & ) -> LRValue< const T >;
 
   template< typename T >
-  using Storage = std::variant< detail::Reference< T >, detail::Value< T > >;
+  using Storage = std::variant< std::reference_wrapper< T >, T >;
 
   template< typename T >
   T &get( Storage< T > &storage )

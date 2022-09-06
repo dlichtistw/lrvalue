@@ -10,8 +10,8 @@ namespace
   class MyClass
   {
     using type = const std::string;
-    using reference_type = detail::Reference< type >;
-    using value_type = detail::Value< type >;
+    using reference_type = std::reference_wrapper< type >;
+    using value_type = type;
 
   public:
     explicit MyClass( std::string &value ) : _storage( reference_type( value ) ) {}
